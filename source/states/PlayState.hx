@@ -1804,6 +1804,8 @@ class PlayState extends MusicBeatState
 			if (touchPad.buttonP != null)			
 					button.deadZones.push(touchPad.buttonP);
 		});
+		if (replayRecorder != null)
+			replayRecorder.setupMobileCRecorder();
 	}
 
 	public function startCountdown()

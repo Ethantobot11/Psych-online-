@@ -97,28 +97,6 @@ class ReplayRecorder extends FlxBasic {
 
 		state.add(this);
 
-		var hitbox:Hitbox = state.controls.requestedHitbox;
-		if(hitbox != null)
-		{
-			hitbox.onButtonDown.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 0));
-			hitbox.onButtonUp.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 1));
-		}
-		else
-		{
-			trace("Tried to init replay recorder for mobile controls but failed.");
-		}
-
-		var touchPad:TouchPad = state.controls.requestedInstance.touchPad;
-		if(touchPad != null)
-		{
-			touchPad.onButtonDown.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 0));
-			touchPad.onButtonUp.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 1));
-		}
-		else
-		{
-			trace("Tried to init replay recorder for touch pad but failed.");
-		}
-
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 
@@ -215,6 +193,24 @@ class ReplayRecorder extends FlxBasic {
 
 			data.inputs.push([time, idName, move]);
 		}
+	}
+
+	public function setupMobileCRecorder():Void {
+		var hitbox:Hitbox = state.controls.requestedHitbox;
+		if (hitbox != null) {
+			hitbox.onButtonDown.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 0));
+			hitbox.onButtonUp.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 1));
+		}
+		else
+			trace("Tried to init replay recorder for mobile controls but failed.");
+
+		var touchPad:TouchPad = state.controls.requestedInstance.touchPad;
+		if (touchPad != null) {
+			touchPad.onButtonDown.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 0));
+			touchPad.onButtonUp.add((button:TouchButton, ids:Array<MobileInputID>) -> recordKeyMobileC(Conductor.songPosition, ids, 1));
+		}
+		else
+			trace("Tried to init replay recorder for touch pad but failed.");
 	}
 
     public function save():Float {
