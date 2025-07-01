@@ -691,10 +691,10 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		for (i => directory in directories) {
-			if (FileSystem.exists(directory)) {
+			//if (FileSystem.exists(directory)) {
 				for (file in FileSystem.readDirectory(directory)) {
 					var path = haxe.io.Path.join([directory, file]);
-					if (!backend.io.PsychFileSystem.isDirectory(path) && file.endsWith('.json')) {
+					if (/*!FileSystem.isDirectory(path) &&*/ file.endsWith('.json')) {
 						var charToCheck:String = file.substr(0, file.length - 5);
 						if (!charsWeeksLoaded.exists(charToCheck)) {
 							charsWeeksLoaded.set(charToCheck, directoryMods[i]);
@@ -707,7 +707,7 @@ class FreeplayState extends MusicBeatState
 						}
 					}
 				}
-			}
+			//}
 		}
 		Mods.loadTopMod();
 
