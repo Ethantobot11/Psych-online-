@@ -73,17 +73,15 @@ class Main extends Sprite
 
 	public static function main():Void
 	{
+		#if !mobile // would crash the game
 		if (Path.normalize(Sys.getCwd()) != Path.normalize(lime.system.System.applicationDirectory)) {
-			Sys.setCwd(lime.system.System.applicationDirectory);
-
-			if (Path.normalize(Sys.getCwd()) != Path.normalize(lime.system.System.applicationDirectory)) {
-				Lib.application.window.alert("Your path is either not run from the game directory,\nor contains illegal UTF-8 characters!\n\nRun from: "
-					+ Sys.getCwd()
-					+ "\nExpected path: "
-					+ lime.system.System.applicationDirectory,
-					"Invalid Runtime Path!");
-				Sys.exit(1);
-			}
+			Lib.application.window.alert("Your path is either not run from the game directory,\nor contains illegal UTF-8 characters!\n\nRun from: "
+				+ Sys.getCwd()
+				+ "\nExpected path: " + lime.system.System.applicationDirectory, 
+			"Invalid Runtime Path!");
+			Sys.exit(1);
+		}
+		#end
 		}
 		
 		Lib.current.addChild(view3D = new online.away.View3DHandler());
@@ -96,6 +94,17 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+		#if mobile
+		#if android
+		StorageUtil.requestPermissions();
+		#end
+		Sys.setCwd(StorageUtil.getStorageDirectory());
+		#end
+		backend.CrashHandler.init();
+
+		#if (cpp && windows)
+		backend.Native.fixScaling();
+		#end
 
 		if (stage != null)
 		{
@@ -168,25 +177,36 @@ class Main extends Sprite
 		}
 		#end
 
-		#if linux
-		Lib.current.stage.window.setIcon(Image.fromFile("icon.png"));
+			#if (linux || mac)
+		final icon:Image = Image.fromFile("icon.png");
+		Lib.current.stage.window.setIcon(icon);
 		#end
 
 		#if html5
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		#end
-		
-		//haxe errors caught by openfl
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, (e) -> {
-			onCrash(e.error);
-		});
-		//internal c++ exceptions
-		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
+
+		FlxG.fixedTimestep = false;
+		FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
+		#if web
+		FlxG.keys.preventDefaultKeys.push(TAB);
+		#else
+		FlxG.keys.preventDefaultKeys = [TAB];
+		#end
+
+		#if android FlxG.android.preventDefaultKeys = [BACK]; #end
 
 		#if DISCORD_ALLOWED
-		DiscordClient.initialize();
+		DiscordClient.start();
 		#end
+
+		#if mobile
+		lime.system.System.allowScreenTimeout = ClientPrefs.data.screensaver; 		
+		FlxG.scaleMode = new MobileScaleMode();
+		#end
+
+        Application.current.window.vsync = ClientPrefs.data.vsync;
 
 		// shader coords fix
 		FlxG.signals.gameResized.add(function (w, h) {
